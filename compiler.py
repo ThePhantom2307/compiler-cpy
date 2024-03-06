@@ -4,6 +4,7 @@ import sys
 def lexicalAnalyzer():
     global code_line
     global code_index
+    global code_file
     
     token_type = "NONE"
 
@@ -55,6 +56,33 @@ def lexicalAnalyzer():
             else:
                 token_type = "NUMBER"
                 return (token_type, current_char, code_line, code_index)
+
+        if (next_char == "#"):
+            current_char = next_char
+            next_char = code_file.read(1)
+            code_index += 1
+
+            if (next_char == "#"):
+                current_char = next_char
+                next_char = code_file.read(1)
+                code_index += 1
+                while (next_char != current_char and current_char == "#"):
+                    current_char = next_char
+                    next_char = code_file.read(1)
+                    code_index += 1
+            else:
+                while (next_char.isalpha()):
+                    current_char += next_char
+                    next_char = code_file.read(1)
+                    code_index += 1
+            
+                if (current_char in keywords):
+                    token_type = "KEYWORD"
+                    return (token_type, current_char, code_line, code_index)
+                else:
+                    print("Error in line " + str(code_line) + " and index " + str(code_index) + ": not recognizing the value \"" + current_char+ "\"")
+                
+                
     ## The format of the return set is (token_type, value, line, index)
     return (token_type, 0, 0, 0)
 

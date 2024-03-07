@@ -39,16 +39,24 @@ def lexicalAnalyzer():
         code_index += 1
 
         if (next_char == "#"):
-            while (next_char != "#" and current_char != next_char):
-                current_char = next_char
-                next_char = code_file.read(1)
-                code_index += 1
-                
+            current_char = next_char
+            next_char = code_file.read(1)
+            
+            start_comment = code_line
+            start_index = current_code_index
+            
+            while (next_char != "#" or current_char != "#"):
                 if (next_char == "\n"):
                     code_line += 1
-                
-                if (next_char == ""):
-                    print("Error: Comment section not closed")
+                    code_index = 1
+        
+                elif (next_char == ""):
+                    print("Error in line " + str(start_comment) + " and index " + str(start_index) + ": Comment section started but never closed")
+                    sys.exit(0)
+                    
+                current_char = next_char
+                next_char = code_file.read(1)
+            
         else:     
             if (next_char.isalpha()):
                 while (next_char.isalpha()):

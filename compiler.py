@@ -20,13 +20,12 @@ def lexicalAnalyzer():
     while (next_char == " " or next_char == "\n" or next_char == "\t"):
         if (next_char == "\n"):
             code_line += 1
+            
+        next_char = code_file.read(1)
         
         if (next_char == ""):
             eof_flag = True
             return (token_type, 0, code_line)
-        
-        next_char = code_file.read(1)
-        
     
     if (next_char == "#"):
         current_char = next_char
@@ -42,7 +41,7 @@ def lexicalAnalyzer():
                 if (next_char == "\n"):
                     code_line += 1
         
-                elif (next_char == ""):
+                if (next_char == ""):
                     print("Syntax error in line " + str(start_comment) + ": Comment section started but never closed")
                     sys.exit(0)
                     
@@ -81,12 +80,12 @@ def lexicalAnalyzer():
             current_char += next_char
             next_char = code_file.read(1)
         
+        code_file.seek(code_file.tell() - 1)
+
         if (current_char in keywords):
-            code_file.seek(code_file.tell() - 1)
             token_type = "KEYWORD"
             return (token_type, current_char, code_line)
         else:
-            code_file.seek(code_file.tell() - 1)
             token_type = "IDENTIFIER"
             return (token_type, current_char, code_line)
         
@@ -98,19 +97,18 @@ def lexicalAnalyzer():
         while (next_char.isdigit()):
             current_char += next_char
             next_char = code_file.read(1)
+            
+        code_file.seek(code_file.tell() - 1)
         
         if (next_char.isalpha()):
-            code_file.seek(code_file.tell() - 1)
             print("Syntax error in line " + str(code_line) + ": Letter \"" + next_char + "\" found after digits \"" + current_char)
             sys.exit(0)
         
         if (int(current_char) > 32767):
-            code_file.seek(code_file.tell() - 1)
             print("Syntax error in line " + str(code_line) + ": The given number \"" + current_char + "\" is out of bounds, accepted numbers [-32767, 32767]")
             sys.exit(0)
         
         else:
-            code_file.seek(code_file.tell() - 1)
             token_type = "NUMBER"
             return (token_type, current_char, code_line)
             

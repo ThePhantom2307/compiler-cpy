@@ -221,5 +221,16 @@ if __name__ == "__main__":
                 "elif", "else", "while", "print", "return",
                 "input", "int", "and", "or", "not")
 
+    with open(sys.argv[1], 'r') as file:
+        lines = file.readlines()
+
+    # Remove trailing empty lines
+    while lines and lines[-1].strip() == '':
+        lines.pop()
+
+    with open(sys.argv[1], 'w') as file:
+        file.writelines(lines)
+
     code_file = open(sys.argv[1], "r")
     startProcessing()
+    code_file.close()

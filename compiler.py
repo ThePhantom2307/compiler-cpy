@@ -1,14 +1,28 @@
+from asyncio.windows_events import NULL
 import sys
 
+### Classes
+class Token:
+    def __init__(self, recognized_token, token_type, line_number):
+        self.recognized_token = recognized_token
+        self.token_type = token_type
+        self.line_number = line_number
+    
+    def __str__(self):
+        return(self.recognized_token + "\t family: " + self.token_type + "\t Line: " + str(self.line_number))
+
+
 ### Functions
+
+## Lexical Analyzer 
 def lexicalAnalyzer():
     global code_line
     global code_file
     global eof_flag
     
-    token_type = "NONE"
+    token_type = "EOF"
 
-    current_char = ""
+    current_char = ''
     next_char = code_file.read(1)
     
     ## Checking if the file is empty
@@ -17,21 +31,22 @@ def lexicalAnalyzer():
         return (token_type, 0, code_line)
 
     ## Checking for white spaces
-    while (next_char == " " or next_char == "\n" or next_char == "\t"):
-        if (next_char == "\n"):
+    while (next_char == ' ' or next_char == '\n' or next_char == '\t'):
+        if (next_char == '\n'):
             code_line += 1
 
         next_char = code_file.read(1)
 
         if (not next_char):
             eof_flag = True
-            return (token_type, 0, code_line)
+            return (token_type, "", code_line)
 
-    if (next_char == "#"):
+    ## Checking for comments or open or closed brackets
+    if (next_char == '#'):
         current_char = next_char
         next_char = code_file.read(1)
 
-        if (next_char == "#"):
+        if (next_char == '#'):
             current_char = next_char
             next_char = code_file.read(1)
 
@@ -40,8 +55,8 @@ def lexicalAnalyzer():
             current_char = next_char
             next_char = code_file.read(1)
 
-            while (next_char != "#" or current_char != "#"):
-                if (next_char == "\n"):
+            while (next_char != '#' or current_char != '#'):
+                if (next_char == '\n'):
                     code_line += 1
         
                 if (not next_char):
@@ -68,12 +83,12 @@ def lexicalAnalyzer():
                     print("Syntax error in line " + str(code_line) + ": Not recognizing the value \"" + current_char + "\"")
                     sys.exit(0)
         
-            elif (next_char == "{"):
+            elif (next_char == '{'):
                 current_char += next_char
                 token_type = "GROUP"
                 return (token_type, current_char, code_line)
         
-            elif (next_char == "}"):
+            elif (next_char == '}'):
                 current_char += next_char
                 token_type = "GROUP"
                 return (token_type, current_char, code_line)
@@ -122,22 +137,25 @@ def lexicalAnalyzer():
         else:
             token_type = "NUMBER"
             return (token_type, current_char, code_line)
-            
-    elif (next_char == "(" or next_char == ")"):
+
+    ## Checking for parentheses
+    elif (next_char == '(' or next_char == ')'):
         current_char = next_char
         token_type = "GROUP"
         return (token_type, current_char, code_line)
     
-    elif (next_char == "+" or next_char == "-" or next_char == "*" or next_char == "%"):
+    ## Checking for operator
+    elif (next_char == '+' or next_char == '-' or next_char == "*" or next_char == "%"):
         current_char = next_char
         token_type = "OPERATOR"
         return (token_type, current_char, code_line)
  
-    elif (next_char == "/"):
+    ## Checking for division operator
+    elif (next_char == '/'):
         current_char = next_char
         next_char = code_file.read(1)
 
-        if (next_char == "/"):
+        if (next_char == '/'):
             current_char += next_char
             token_type = "OPERATOR"
             return (token_type, current_char, code_line)
@@ -146,16 +164,18 @@ def lexicalAnalyzer():
             print("Syntax error in line " + str(code_line) + ": Not recognizing the value \"" + current_char + "\"")
             sys.exit(0)
    
-    elif (next_char == ":" or next_char == ","):
+    ## Checking for seperator
+    elif (next_char == ':' or next_char == ','):
         current_char = next_char
         token_type = "SEPERATOR"
         return (token_type, current_char, code_line)
     
-    elif (next_char == "="):
+    ## Checking for correlation or assigmnent
+    elif (next_char == '='):
         current_char = next_char
         next_char = code_file.read(1)
         
-        if (next_char == "="):
+        if (next_char == '='):
             current_char += next_char
             token_type = "CORRELATION"
             return (token_type, current_char, code_line)
@@ -164,11 +184,12 @@ def lexicalAnalyzer():
             token_type = "ASSIGNMENT"
             return (token_type, current_char, code_line)
     
-    elif (next_char == "<"):
+    ## Checking for number correlation
+    elif (next_char == '<'):
         current_char = next_char
         next_char = code_file.read(1)
         
-        if (next_char == "="):
+        if (next_char == '='):
             current_char += next_char
             token_type = "CORRELATION"
             return (token_type, current_char, code_line)
@@ -177,11 +198,12 @@ def lexicalAnalyzer():
             token_type = "ASSIGNMENT"
             return (token_type, current_char, code_line)
 
-    elif (next_char == ">"):
+    ## Checking for number correlation
+    elif (next_char == '>'):
         current_char = next_char
         next_char = code_file.read(1)
         
-        if (next_char == "="):
+        if (next_char == '='):
             current_char += next_char
             token_type = "CORRELATION"
             return (token_type, current_char, code_line)
@@ -189,12 +211,13 @@ def lexicalAnalyzer():
             code_file.seek(code_file.tell() - 1)
             token_type = "ASSIGNMENT"
             return (token_type, current_char, code_line)
-        
-    elif (next_char == "!"):
+
+    ## Checking for number correlation
+    elif (next_char == '!'):
         current_char = next_char
         next_char = code_file.read(1)
         
-        if (next_char == "="):
+        if (next_char == '='):
             current_char += next_char
             token_type = "CORRELATION"
             return (token_type, current_char, code_line)
@@ -202,35 +225,56 @@ def lexicalAnalyzer():
             print("Syntax error in line " + str(code_line) + ": Invalid character after the character \"" + current_char + "\"")
             sys.exit(0)
 
+    ## Print error message if there is invalid syntax
     else:
         current_char = next_char
         print("Syntax error in line " + str(code_line) + ": Invalid syntax \"" + current_char + "\"")
         sys.exit(0)
 
-### The main function for all processes
-def startProcessing():
+## Return next token
+def next_token():
+    global token_index
+    token_index += 1
+    return (tokens[token_index])
+
+## The main function for all processes
+def startCompiling():
     while (not eof_flag):
-        print(lexicalAnalyzer())
-    
+        lexicalResult = lexicalAnalyzer()
+        new_token = Token(lexicalResult[1], lexicalResult[0], lexicalResult[2])
+        tokens.append(new_token)
+        
+    token = next_token()
+    while (token.token_type != "EOF"):
+        print(token)
+        token = next_token()
+        
 ### Main Program
 if __name__ == "__main__":
+    
     code_line = 1
     eof_flag = False
-    
+    token_index = -1
+    token = ()
+    tokens = []
     keywords = ("main", "def", "#def", "#int", "global", "if",
                 "elif", "else", "while", "print", "return",
                 "input", "int", "and", "or", "not")
+    
 
     with open(sys.argv[1], 'r') as file:
         lines = file.readlines()
 
-    # Remove trailing empty lines
     while lines and lines[-1].strip() == '':
         lines.pop()
 
     with open(sys.argv[1], 'w') as file:
         file.writelines(lines)
-
+    
+    file.close()
+    
     code_file = open(sys.argv[1], "r")
-    startProcessing()
+    print("Start Compiling...")
+    startCompiling()
+    print("Compilation Completed succesfully!")
     code_file.close()

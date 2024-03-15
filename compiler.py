@@ -290,19 +290,54 @@ def globalStatement():
         token = nextToken()
         variables()
 
+def intStatement():
+    global token
+    print("DEBUG: int")
+    token = nextToken()
+    if (token.recognized_token == "("):
+        print("DEBUG: (")
+        token = nextToken()
+        if (token.recognized_token == "input"):
+            print("DEBUG: input")
+            token = nextToken()
+            if (token.recognized_token == "("):
+                print("DEBUG: (")
+                token = nextToken()
+                if (token.recognized_token == ")"):
+                    print("DEBUG: )")
+                    token = nextToken()
+                    if (token.recognized_token == ")"):
+                        print("DEBUG: )")
+                        token = nextToken()
+                    else:
+                        print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+                else:
+                    print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+            else:
+                print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+        else:
+            print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+    else:
+        print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+
 def assignmentStatement():
     global token
+    global index
     if (token.token_type == "IDENTIFIER"):
         token = nextToken()
         if (token.recognized_token == "="):
             ## Check if the assignment value is correct with the function below
             ## assignment()
             token = nextToken()
+            if (token.recognized_token == "int"):
+                index -= 1
+                intStatement()
+            else:
+                token = nextToken()
         else:
             print("Syntax error in line " + str(token.line_number) + ": Invalid syntax, \"" + token.recognized_token + "\" not expected")
     else:
         print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
-            
 
 def statement():
     global token
@@ -390,7 +425,17 @@ def subPrograms():
                 print("Syntax error in line " + str(token.line_number) + ": \"(\" expected, but " + token.token_type + " " + token.recognized_token + " recieved")
         else:
             print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
-                
+
+def mainProgram():
+    global token
+    if (token.recognized_token == "#def"):
+        token = nextToken()
+        if (token.recognized_token == "main"):
+            token = nextToken()
+        else:
+            print("Syntax error in line " + str(token.line_number) + ": IDENTIFIER expected, but " + token.token_type + " recieved")
+    else:
+        print("Syntax error in line " + str(token.line_number) + ": You should define the main part of program")
 
 def program():
     # Create this function so it can recognize declaretions, functions and finally the main program of the code
@@ -398,6 +443,7 @@ def program():
     token = nextToken()
     declarations()
     subPrograms()
+    mainProgram()
 
 ## Syntax Analyzer
 def syntaxAnalyzer():
